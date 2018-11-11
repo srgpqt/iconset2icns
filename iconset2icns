@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+iconset = File.expand_path(ARGV[0] || '.')
+icns = iconset.sub(/\.iconset[\/\\]?$/, '') + '.icns'
+
+def read_icon(iconset, format, icon_name)
+  filename = File.expand_path(icon_name, iconset)
+  data = IO.read(filename, encoding: 'BINARY')
+  data.prepend([data.size + 8].pack('L>').prepend(format))
+rescue Errno::ENOENT
+  ''
+end
+
+buf = String.new.b
+
+buf << read_icon(iconset, 'icp4', 'icon_16x16.png'     )
+buf << read_icon(iconset, 'ic11', 'icon_16x16@2x.png'  )
+buf << read_icon(iconset, 'icp5', 'icon_32x32.png'     )
+buf << read_icon(iconset, 'ic12', 'icon_32x32@2x.png'  )
+buf << read_icon(iconset, 'icp6', 'icon_64x64.png'     )
+buf << read_icon(iconset, 'ic07', 'icon_128x128.png'   )
+buf << read_icon(iconset, 'ic13', 'icon_128x128@2x.png')
+buf << read_icon(iconset, 'ic08', 'icon_256x256.png'   )
+buf << read_icon(iconset, 'ic14', 'icon_256x256@2x.png')
+buf << read_icon(iconset, 'ic09', 'icon_512x512.png'   )
+buf << read_icon(iconset, 'ic10', 'icon_512x512@2x.png')
+
+File.open icns, 'wb' do |f|
+  f.write 'icns'
+  f.write [buf.size + 8].pack('L>')
+  f.write buf
+end
